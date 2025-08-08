@@ -10,6 +10,8 @@ const PORT = process.env.PORT || 3000;
 
 connectDB();
 
+const methodOverride = require('method-override');
+app.use(methodOverride('_method'));
 
 app.use(cookieParser());
 app.use(express.static('public'));

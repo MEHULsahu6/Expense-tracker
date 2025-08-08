@@ -1,32 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Xpenso - Expenses</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap & Font Awesome -->
+  <!-- Bootstrap, Font Awesome, Animate CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/css/home.css">
 </head>
-<body>
 
-  <!-- Navbar -->
+<body class="bg-black text-white">
+
   <%- include('../partials/navbar') %>
 
   <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="text-warning">Your Expenses</h2>
-      <a href="/expenses/new" class="btn btn-orange">
+      <a href="#" class="btn btn-warning shadow-sm fw-bold px-4 py-2 rounded-3" id="toggleFormBtn">
         <i class="fas fa-plus me-1"></i> Add Expense
       </a>
     </div>
 
-    <!-- Hardcoded table data -->
+    <!-- Add/Edit Expense Form -->
+    <div id="expenseForm" class="p-4 mb-5 rounded-4 shadow-lg"
+      style="display: none; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
+      <form id="expenseFormElement" method="POST" class="text-light">
+        <input type="hidden" name="_method" value="POST" id="formMethod">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" name="title" id="title" class="form-control bg-dark text-light border-light" placeholder="e.g. Grocery shopping" required>
+          </div>
+          <div class="col-md-3">
+            <label for="amount" class="form-label">Amount (₹)</label>
+            <input type="number" name="amount" id="amount" class="form-control bg-dark text-light border-light" placeholder="e.g. 1500" required>
+          </div>
+          <div class="col-md-3">
+            <label for="category" class="form-label">Category</label>
+            <input type="text" name="category" id="category" class="form-control bg-dark text-light border-light" placeholder="e.g. Food, Bills" required>
+          </div>
+          <div class="col-md-4 mt-3">
+            <label for="date" class="form-label">Date</label>
+            <input type="date" name="date" id="date" class="form-control bg-dark text-light border-light" required>
+          </div>
+        </div>
+        <div class="mt-4 d-flex justify-content-end">
+          <button type="submit" class="btn btn-success px-4 py-2 fw-bold shadow">Save Expense</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Expenses Table -->
     <div class="table-responsive">
-      <table class="table table-dark table-bordered table-hover text-center">
-        <thead class="table-secondary text-dark">
+      <table class="table table-dark table-bordered table-hover text-center rounded-3 overflow-hidden">
+        <thead class="table-warning text-dark">
           <tr>
             <th>#</th>
             <th>Title</th>
@@ -37,58 +68,88 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Groceries</td>
-            <td>1200</td>
-            <td>Food</td>
-            <td>25/07/2025</td>
-            <td>
-              <a href="#" class="btn btn-sm btn-outline-light me-2">Edit</a>
-              <form action="#" method="POST" class="d-inline">
-                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-              </form>
-            </td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>Electricity Bill</td>
-            <td>750</td>
-            <td>Utilities</td>
-            <td>22/07/2025</td>
-            <td>
-              <a href="#" class="btn btn-sm btn-outline-light me-2">Edit</a>
-              <form action="#" method="POST" class="d-inline">
-                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-              </form>
-            </td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td>Movie Tickets</td>
-            <td>600</td>
-            <td>Entertainment</td>
-            <td>20/07/2025</td>
-            <td>
-              <a href="#" class="btn btn-sm btn-outline-light me-2">Edit</a>
-              <form action="#" method="POST" class="d-inline">
-                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-              </form>
-            </td>
-          </tr>
+          <% if (expenses.length === 0) { %>
+            <tr>
+              <td colspan="6">No expenses found.</td>
+            </tr>
+          <% } else { %>
+            <% expenses.forEach((expense, index) => { %>
+              <tr>
+                <td><%= index + 1 %></td>
+                <td><%= expense.title %></td>
+                <td><%= expense.amount %></td>
+                <td><%= expense.category %></td>
+                <td><%= new Date(expense.date).toLocaleDateString() %></td>
+                <td>
+                  <button type="button"
+                    class="btn btn-sm btn-outline-light me-2"
+                    onclick="editExpense('<%= expense._id %>', '<%= expense.title %>', '<%= expense.amount %>', '<%= expense.category %>', '<%= expense.date.toISOString() %>')">
+                    Edit
+                  </button>
+                  <form action="/api/user/expenses/<%= expense._id %>?_method=DELETE" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
         </tbody>
       </table>
     </div>
-
-    <!-- Comment out or remove if hardcoding -->
-    <!-- <p class="text-light">No expenses found. Start tracking your spending now!</p> -->
-
   </div>
 
-  <!-- Footer -->
   <%- include('../partials/footer') %>
 
-  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Toggle & Edit Logic -->
+  <script>
+    const toggleBtn = document.getElementById('toggleFormBtn');
+    const expenseForm = document.getElementById('expenseForm');
+    const form = document.getElementById('expenseFormElement');
+    const formMethod = document.getElementById('formMethod');
+
+    const titleInput = document.getElementById('title');
+    const amountInput = document.getElementById('amount');
+    const categoryInput = document.getElementById('category');
+    const dateInput = document.getElementById('date');
+    const submitBtn = document.querySelector('#expenseForm button[type="submit"]');
+
+    toggleBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      resetForm();
+      showForm(true);
+    });
+
+    function showForm(show) {
+      expenseForm.style.display = show ? 'block' : 'none';
+      toggleBtn.innerHTML = show
+        ? '<i class="fas fa-times me-1"></i> Close'
+        : '<i class="fas fa-plus me-1"></i> Add Expense';
+    }
+
+    function resetForm() {
+      titleInput.value = '';
+      amountInput.value = '';
+      categoryInput.value = '';
+      dateInput.value = '';
+      form.action = '/api/user/expenses';
+      formMethod.value = 'POST';
+      submitBtn.innerText = 'Save Expense';
+    }
+
+    function editExpense(id, title, amount, category, date) {
+      titleInput.value = title;
+      amountInput.value = amount;
+      categoryInput.value = category;
+      dateInput.value = date.split('T')[0]; // format YYYY-MM-DD
+
+      form.action = `/api/user/expenses/${id}`;
+      formMethod.value = 'PUT';
+      submitBtn.innerText = 'Update Expense';
+      showForm(true);
+    }
+  </script>
 </body>
+
 </html>
