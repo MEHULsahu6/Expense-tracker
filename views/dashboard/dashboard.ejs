@@ -1,11 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <title>Xpenso | Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>Dashboard</h1>
+
+<body class="bg-dark text-white">
+  <!-- Navbar -->
+  <%- include('../partials/navbar') %>
+
+  <!-- Welcome Section -->
+  <section class="container mt-5">
+    <div class="bg-secondary bg-opacity-10 border border-secondary rounded p-4 text-center">
+      <h2 class="text-warning">Welcome, <%= user.name %> 👋</h2>
+      <p class="lead mb-3">Take control of your spending. Visualize, track & manage your finances.</p>
+      <a href="/expenses" class="btn btn-warning me-2">Manage Expenses</a>
+      <a href="/income" class="btn btn-success">Manage Income</a>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="container my-5">
+    <div class="row g-4">
+      <!-- Total Balance -->
+      <div class="col-md-4">
+        <div class="card bg-dark text-white text-center border border-secondary shadow">
+          <div class="card-body">
+            <i class="fas fa-wallet fa-2x text-info mb-2"></i>
+            <h5 class="card-title">Total Balance</h5>
+            <p class="fs-5">₹<%=totalIncome-totalExpense %></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Income -->
+      <div class="col-md-4">
+        <div class="card bg-dark text-white text-center border border-success shadow">
+          <div class="card-body">
+            <i class="fas fa-arrow-up fa-2x text-success mb-2"></i>
+            <h5 class="card-title">Total Income</h5>
+            <p class="fs-5 text-success">₹<%= totalIncome %></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Expenses -->
+      <div class="col-md-4">
+        <div class="card bg-dark text-white text-center border border-danger shadow">
+          <div class="card-body">
+            <i class="fas fa-arrow-down fa-2x text-danger mb-2"></i>
+            <h5 class="card-title">Total Expenses</h5>
+            <p class="fs-5 text-danger">₹<%= totalExpense %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="container mb-5 text-center">
+    <h4 class="mb-3 text-light">Want detailed insights?</h4>
+    <a href="/analytics" class="btn btn-primary">View Analytics</a>
+  </section>
+
+  <!-- Footer -->
+  <%- include('../partials/footer') %>
+
+  <!-- Bootstrap Script -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

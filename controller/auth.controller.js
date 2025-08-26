@@ -2,7 +2,6 @@ const User = require('../models/userModel');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// Register Controller
 exports.register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -20,6 +19,28 @@ exports.register = async (req, res) => {
       password: hashedPassword
     });
 
+    
+    const token = jwt.sign(
+      {
+        id: user._id,
+        name: user.name,
+        email: user.email
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: process.env.JWT_EXPIRE || '1d',
+      }
+    );
+
+   
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: true, 
+      sameSite: 'lax',
+      maxAge: 3600000,
+    });
+
+   
     res.redirect('/');
   } catch (error) {
     console.error('Signup Error:', error);
@@ -27,7 +48,8 @@ exports.register = async (req, res) => {
   }
 };
 
-// Login Controller
+
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -38,8 +60,11 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRE || '1h',
+    const token = jwt.sign({ id: user._id,
+      name: user.name,
+      email: user.email
+     }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRE || '1d',
     });
 
     res.cookie('token', token, {
@@ -56,7 +81,7 @@ exports.login = async (req, res) => {
   }
 };
 
-// Logout Controller
+
 exports.logout = (req, res) => {
   res.clearCookie('token');
   res.redirect('/api/auth/login');
