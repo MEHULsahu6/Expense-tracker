@@ -2,7 +2,7 @@
 
 **Xpenso** is a secure, minimal, and responsive personal expense tracking web application. Built using **Node.js**, **Express.js**, **MongoDB**, and **EJS**, it allows users to **register, login, logout, and manage their dashboard securely using JWT-based authentication**.
 
-LINK : https://expense-tracker-znch.onrender.com
+LINK : https://expense-tracker-esd7.onrender.com
 
 ---
 
@@ -96,4 +96,5 @@ Feel free to fork this repo, raise issues, or contribute new features!
 - Graphical analytics (charts)
 - Email/password recovery
 - Mobile responsiveness
+
 
