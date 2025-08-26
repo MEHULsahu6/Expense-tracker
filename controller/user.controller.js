@@ -38,11 +38,7 @@ exports.getDashboard = async (req, res) => {
 };
 
 
-
-
 // ---------------- Reports ----------------
-
-// Reports Page with real data
 exports.report = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -90,7 +86,7 @@ exports.report = async (req, res) => {
 const { Parser } = require("json2csv");
 const PDFDocument = require("pdfkit");
 
-// ✅ CSV Export (real data)
+// csv export
 exports.exportCSV = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -124,7 +120,7 @@ exports.exportCSV = async (req, res) => {
   }
 };
 
-// ✅ PDF Export (real data)
+// PDF Export 
 exports.exportPDF = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -161,12 +157,6 @@ exports.exportPDF = async (req, res) => {
 };
 
 
-
-
-
-
-
-
 // Analytics Page
 exports.analytics = (req, res) => {
   res.render('analytics/analytics', { user: req.user });
@@ -183,7 +173,7 @@ exports.getBudgetPage = async (req, res) => {
       budgets,
       totalExpense,
       totalIncome,
-      totalSpent: totalExpense, // 👈 yeh naam tum template me use kar sakte ho
+      totalSpent: totalExpense, 
       message: null,
     });
   } catch (error) {
@@ -205,7 +195,7 @@ exports.budget = async (req, res) => {
       return res.status(400).send('Category and amount are required');
     }
 
-    // डेटाबेस में नया बजट बनाएं
+    
     await budgetScema.create({
       userId: req.user._id,
       category,
@@ -214,8 +204,7 @@ exports.budget = async (req, res) => {
       spent: 0
     });
 
-    // महत्वपूर्ण बदलाव: पेज को रेंडर करने के बजाय उसे रीडायरेक्ट करें
-    // इससे ब्राउज़र रीफ़्रेश पर फॉर्म को दोबारा सबमिट नहीं करेगा
+    
     res.redirect('/budget');
 
   } catch (error) {
@@ -395,9 +384,12 @@ exports.analytics = async (req, res) => {
     const categoryLabels = Object.keys(categoryMap);
     const categoryValues = Object.values(categoryMap);
 
-    // Monthly aggregation
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    
+    const monthNames = 
+    [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
     const monthMap = {};
     monthNames.forEach(m => (monthMap[m] = 0));
 

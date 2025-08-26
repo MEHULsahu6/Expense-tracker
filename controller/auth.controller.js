@@ -35,7 +35,7 @@ exports.register = async (req, res) => {
    
     res.cookie('token', token, {
       httpOnly: true,
-      secure: false, // true only in production
+      secure: true, 
       sameSite: 'lax',
       maxAge: 3600000,
     });
@@ -64,7 +64,7 @@ exports.login = async (req, res) => {
       name: user.name,
       email: user.email
      }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRE || '1h',
+      expiresIn: process.env.JWT_EXPIRE || '1d',
     });
 
     res.cookie('token', token, {
