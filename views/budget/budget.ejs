@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Xpenso - Budget</title>
@@ -9,149 +10,199 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/css/home.css">
+  <style>
+    body {
+      background-color: #121212;
+      color: #E0E0E0;
+    }
+
+    .premium-card {
+      background: #1F1F1F;
+      border: 1px solid #2A2A2A;
+      border-radius: 1rem;
+      color: #E0E0E0;
+      transition: all 0.3s ease;
+    }
+
+    .premium-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 20px rgba(255, 193, 7, 0.2);
+      border-color: #FFC107;
+    }
+
+    .form-control,
+    .form-select {
+      background-color: #1E1E1E;
+      color: #E0E0E0;
+      border: 1px solid #333;
+    }
+
+    .form-control::placeholder {
+      color: #aaa;
+    }
+
+    .premium-header {
+      background-color: #1A1A1A;
+      border-bottom: 1px solid #FFC107;
+    }
+
+    .badge {
+      font-size: 0.85rem;
+    }
+  </style>
 </head>
+
 <body>
 
-  <!-- Navbar -->
   <%- include('../partials/navbar') %>
 
-  <div class="container py-5">
-    <h2 class="text-warning mb-4">Monthly Budget</h2>
+    <div class="container py-5">
+      <h2 class="text-warning mb-4">Monthly Budget</h2>
 
-    <!-- Summary Cards -->
-    <div class="row mb-5">
-      <div class="col-md-4">
-        <div class="card text-bg-dark shadow-sm border-warning">
-          <div class="card-body">
-            <h5 class="card-title text-warning">Total Budget</h5>
-            <p class="fs-4">₹10,000</p>
+      <!-- Summary Cards -->
+      <div class="row mb-5">
+        <div class="col-md-4">
+          <div class="card premium-card text-warning shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Total Budget</h5>
+              <p class="fs-4">₹<%= totalIncome %>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card premium-card text-warning shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Total Spent</h5>
+              <p class="fs-4">₹<%= totalSpent %>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card premium-card text-warning shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Remaining</h5>
+              <p class="fs-4">₹<%= (totalIncome - totalExpense) %>
+              </p>
+            </div>
           </div>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="card text-bg-dark shadow-sm border-warning">
-          <div class="card-body">
-            <h5 class="card-title text-warning">Total Spent</h5>
-            <p class="fs-4">₹6,900</p>
-          </div>
+
+      <!-- Budget Form -->
+      <div class="card premium-card mb-5 shadow">
+        <div class="card-header premium-header">
+          <h5 class="mb-0 text-warning">Set Budget</h5>
+        </div>
+        <div class="card-body">
+          <form action="/api/user/budget" method="POST">
+            <div class="row g-3 align-items-end">
+              <!-- Category -->
+              <div class="col-md-4">
+                <label for="categorySelect" class="form-label">Category</label>
+                <select class="form-select" name="category" id="categorySelect" required>
+                  <option value="">Select Category</option>
+                  <!-- Default Categories -->
+                  <option value="Food">Food</option>
+                  <option value="Transport">Transport</option>
+                  <option value="Rent">Rent</option>
+                  <option value="Shopping">Shopping</option>
+                  <option value="Entertainment">Entertainment</option>
+                  <option value="Savings">Savings</option>
+                  <!-- Show existing budgets as options -->
+                  <% budgets.forEach(b=> { %>
+                    <option value="<%= b.category %>">
+                      <%= b.category %>
+                    </option>
+                    <% }) %>
+                      <option value="custom">Custom</option>
+                </select>
+                <!-- Custom Input -->
+                <label for="customCategoryInput" class="form-label mt-2 d-none" id="customLabel">Custom Category</label>
+                <input type="text" name="customCategory" id="customCategoryInput" class="form-control mt-1 d-none"
+                  placeholder="Enter custom category">
+              </div>
+
+              <!-- Amount -->
+              <div class="col-md-4">
+                <label for="amount" class="form-label">Budget Amount (₹)</label>
+                <input type="number" name="amount" id="amount" class="form-control" required>
+              </div>
+
+              <!-- Submit -->
+              <div class="col-md-4">
+                <button type="submit" class="btn btn-warning w-100">Save Budget</button>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="card text-bg-dark shadow-sm border-warning">
-          <div class="card-body">
-            <h5 class="card-title text-warning">Remaining</h5>
-            <p class="fs-4">₹3,100</p>
-          </div>
-        </div>
+
+      <!-- Budget Breakdown -->
+      <h5 class="text-warning mb-3">Budget Breakdown</h5>
+      <div class="row g-4">
+        <% if (budgets.length===0) { %>
+          <div class="col-12 text-muted">No budgets yet. Add one above.</div>
+          <% } %>
+
+            <% budgets.forEach((item, index)=> { %>
+              <div class="col-md-4">
+                <div class="card premium-card h-100 shadow-sm">
+                  <div class="card-body">
+                    <h5 class="card-title text-warning">
+                      <%= item.category %>
+                    </h5>
+                    <p class="mb-1"><strong>💰 Budget:</strong> ₹<%= item.amount %>
+                    </p>
+                    <p class="mb-1"><strong>🧾 Spent:</strong> ₹<%= item.spent || 0 %>
+                    </p>
+                    <p class="mb-3"><strong>📉 Remaining:</strong> ₹<%= item.remaining %>
+                    </p>
+
+                    <% if (item.remaining>= 0) { %>
+                      <span class="badge bg-success px-3 py-1">Under Budget</span>
+                      <% } else { %>
+                        <span class="badge bg-danger px-3 py-1">Over Budget</span>
+                        <% } %>
+                  </div>
+                  <div class="card-footer bg-transparent border-top text-end">
+                    <form action="/api/user/budget/<%= item._id %>?_method=DELETE" method="POST">
+                      <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">
+                        <i class="fas fa-trash-alt"></i> Delete
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              <% }) %>
       </div>
     </div>
 
-    <!-- Budget Form -->
-    <div class="card text-bg-dark mb-5 shadow">
-      <div class="card-header border-warning border-bottom">
-        <h5 class="mb-0 text-warning">Set Budget</h5>
-      </div>
-      <div class="card-body">
-        <form action="/api/user/budget" method="POST">
-          <div class="row g-3 align-items-end">
+    <!-- Footer -->
+    <%- include('../partials/footer') %>
 
-            <!-- Category -->
-            <div class="col-md-4">
-              <label for="categorySelect" class="form-label text-light">Category</label>
-              <select class="form-select" name="category" id="categorySelect" required>
-                <option value="">Select Category</option>
-                <option value="Food">Food</option>
-                <option value="Transport">Transport</option>
-                <option value="Bills">Bills</option>
-                <option value="Shopping">Shopping</option>
-                <option value="custom">Custom</option>
-              </select>
+      <!-- Custom Category Input Logic -->
+      <script>
+        const categorySelect = document.getElementById("categorySelect");
+        const customCategoryInput = document.getElementById("customCategoryInput");
+        const customLabel = document.getElementById("customLabel");
 
-              <!-- Custom Input & Label -->
-              <label for="customCategoryInput" class="form-label text-light mt-2 d-none" id="customLabel">Custom Category</label>
-              <input type="text" name="customCategory" id="customCategoryInput" class="form-control mt-1 d-none" placeholder="Enter custom category">
-            </div>
+        categorySelect.addEventListener("change", function () {
+          if (categorySelect.value === "custom") {
+            customCategoryInput.classList.remove("d-none");
+            customLabel.classList.remove("d-none");
+            customCategoryInput.required = true;
+          } else {
+            customCategoryInput.classList.add("d-none");
+            customLabel.classList.add("d-none");
+            customCategoryInput.required = false;
+          }
+        });
+      </script>
 
-            <!-- Amount -->
-            <div class="col-md-4">
-              <label for="amount" class="form-label text-light">Budget Amount (₹)</label>
-              <input type="number" name="amount" id="amount" class="form-control" required>
-            </div>
-
-            <!-- Submit -->
-            <div class="col-md-4">
-              <button type="submit" class="btn btn-warning w-100">Save Budget</button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Budget Table -->
-    <div class="card text-bg-dark shadow">
-      <div class="card-header border-warning border-bottom">
-        <h5 class="mb-0 text-warning">Budget Breakdown</h5>
-      </div>
-      <div class="card-body table-responsive">
-        <table class="table table-dark table-hover text-center">
-          <thead class="table-secondary text-dark">
-            <tr>
-              <th>#</th>
-              <th>Category</th>
-              <th>Budgeted (₹)</th>
-              <th>Spent (₹)</th>
-              <th>Remaining (₹)</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-           
-          <% budgets.forEach((item, index) => { %>
-  <tr>
-    <td><%= index + 1 %></td>
-    <td><%= item.category %></td>
-    <td><%= item.amount %></td>
-    <td><%= item.spent %></td>
-    <td><%= item.remaining %></td>
-    <td>
-      <% if (item.remaining >= 0) { %>
-        <span class="badge bg-success">Under</span>
-      <% } else { %>
-        <span class="badge bg-danger">Over</span>
-      <% } %>
-    </td>
-  </tr>
-<% }) %>
-
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <%- include('../partials/footer') %>
-
-  <!-- Custom Category Input Logic -->
-  <script>
-    const categorySelect = document.getElementById("categorySelect");
-    const customCategoryInput = document.getElementById("customCategoryInput");
-    const customLabel = document.getElementById("customLabel");
-
-    categorySelect.addEventListener("change", function () {
-      if (categorySelect.value === "custom") {
-        customCategoryInput.classList.remove("d-none");
-        customLabel.classList.remove("d-none");
-        customCategoryInput.required = true;
-      } else {
-        customCategoryInput.classList.add("d-none");
-        customLabel.classList.add("d-none");
-        customCategoryInput.required = false;
-      }
-    });
-  </script>
-
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+      <!-- Bootstrap JS -->
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

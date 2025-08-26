@@ -31,7 +31,7 @@ const homeRoutes = require('./routes/user.routes');
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/static', staticRoutes);
-app.use('/', homeRoutes)
+app.use('/', homeRoutes);
 
 
 

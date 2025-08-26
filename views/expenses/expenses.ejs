@@ -11,6 +11,15 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/css/home.css">
+
+  <style>
+    /* Animation for hide */
+    .fade-out { animation: fadeOut 0.35s forwards; }
+    @keyframes fadeOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(-8px); display: none; }
+    }
+  </style>
 </head>
 
 <body class="bg-black text-white">
@@ -39,10 +48,24 @@
             <label for="amount" class="form-label">Amount (₹)</label>
             <input type="number" name="amount" id="amount" class="form-control bg-dark text-light border-light" placeholder="e.g. 1500" required>
           </div>
+
+          <!-- Category select populated from budgets + Other -->
           <div class="col-md-3">
-            <label for="category" class="form-label">Category</label>
-            <input type="text" name="category" id="category" class="form-control bg-dark text-light border-light" placeholder="e.g. Food, Bills" required>
+            <label for="categorySelect" class="form-label">Category</label>
+            <select name="category" id="categorySelect" class="form-select bg-dark text-light border-light" required>
+              <option value="">Select Category</option>
+              <% if (categories && categories.length) { %>
+                <% categories.forEach(cat => { %>
+                  <option value="<%= cat %>"><%= cat %></option>
+                <% }) %>
+              <% } %>
+              <option value="Other">Other</option>
+            </select>
+
+            <!-- custom category input for "Other" -->
+            <input type="text" name="customCategory" id="customCategoryInput" class="form-control bg-dark text-light border-light mt-2 d-none" placeholder="Enter category name">
           </div>
+
           <div class="col-md-4 mt-3">
             <label for="date" class="form-label">Date</label>
             <input type="date" name="date" id="date" class="form-control bg-dark text-light border-light" required>
@@ -68,7 +91,7 @@
           </tr>
         </thead>
         <tbody>
-          <% if (expenses.length === 0) { %>
+          <% if (!expenses || expenses.length === 0) { %>
             <tr>
               <td colspan="6">No expenses found.</td>
             </tr>
@@ -83,7 +106,7 @@
                 <td>
                   <button type="button"
                     class="btn btn-sm btn-outline-light me-2"
-                    onclick="editExpense('<%= expense._id %>', '<%= expense.title %>', '<%= expense.amount %>', '<%= expense.category %>', '<%= expense.date.toISOString() %>')">
+                    onclick="editExpense('<%= expense._id %>', `<%= expense.title.replace(/`/g,'\\`') %>`, '<%= expense.amount %>', `<%= expense.category.replace(/`/g,'\\`') %>`, '<%= expense.date.toISOString() %>')">
                     Edit
                   </button>
                   <form action="/api/user/expenses/<%= expense._id %>?_method=DELETE" method="POST" class="d-inline">
@@ -111,38 +134,85 @@
 
     const titleInput = document.getElementById('title');
     const amountInput = document.getElementById('amount');
-    const categoryInput = document.getElementById('category');
+    const categorySelect = document.getElementById('categorySelect');
+    const customCategoryInput = document.getElementById('customCategoryInput');
     const dateInput = document.getElementById('date');
     const submitBtn = document.querySelector('#expenseForm button[type="submit"]');
 
     toggleBtn.addEventListener('click', function (e) {
       e.preventDefault();
-      resetForm();
-      showForm(true);
+      if (expenseForm.style.display === 'block') {
+        hideForm();
+      } else {
+        resetForm();
+        showForm(true);
+      }
     });
 
     function showForm(show) {
-      expenseForm.style.display = show ? 'block' : 'none';
+      if (show) {
+        expenseForm.classList.remove('fade-out');
+        expenseForm.classList.add('animate__animated', 'animate__fadeIn');
+        expenseForm.style.display = 'block';
+      }
       toggleBtn.innerHTML = show
         ? '<i class="fas fa-times me-1"></i> Close'
         : '<i class="fas fa-plus me-1"></i> Add Expense';
     }
 
+    function hideForm() {
+      expenseForm.classList.remove('animate__fadeIn');
+      expenseForm.classList.add('fade-out');
+      setTimeout(() => {
+        expenseForm.style.display = 'none';
+        toggleBtn.innerHTML = '<i class="fas fa-plus me-1"></i> Add Expense';
+      }, 350);
+    }
+
     function resetForm() {
       titleInput.value = '';
       amountInput.value = '';
-      categoryInput.value = '';
+      categorySelect.value = '';
+      customCategoryInput.value = '';
+      customCategoryInput.classList.add('d-none');
       dateInput.value = '';
       form.action = '/api/user/expenses';
       formMethod.value = 'POST';
       submitBtn.innerText = 'Save Expense';
     }
 
+    // show custom input if "Other" selected
+    categorySelect.addEventListener('change', function () {
+      if (categorySelect.value === 'Other') {
+        customCategoryInput.classList.remove('d-none');
+        customCategoryInput.required = true;
+      } else {
+        customCategoryInput.classList.add('d-none');
+        customCategoryInput.required = false;
+      }
+    });
+
+    // Edit existing expense (prefill form)
     function editExpense(id, title, amount, category, date) {
       titleInput.value = title;
       amountInput.value = amount;
-      categoryInput.value = category;
-      dateInput.value = date.split('T')[0]; // format YYYY-MM-DD
+
+      // if category exists in select options, select it
+      const options = Array.from(categorySelect.options).map(o => o.value);
+      if (options.includes(category)) {
+        categorySelect.value = category;
+        customCategoryInput.classList.add('d-none');
+        customCategoryInput.required = false;
+        customCategoryInput.value = '';
+      } else {
+        // not present → treat as Other + fill custom
+        categorySelect.value = 'Other';
+        customCategoryInput.classList.remove('d-none');
+        customCategoryInput.required = true;
+        customCategoryInput.value = category;
+      }
+
+      dateInput.value = date.split('T')[0];
 
       form.action = `/api/user/expenses/${id}`;
       formMethod.value = 'PUT';
@@ -151,5 +221,4 @@
     }
   </script>
 </body>
-
 </html>

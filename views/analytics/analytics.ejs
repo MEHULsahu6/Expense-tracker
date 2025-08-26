@@ -4,9 +4,59 @@
   <meta charset="UTF-8" />
   <title>Xpenso - Analytics</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap & Font Awesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/css/home.css">
+
+  <!-- Custom CSS -->
+  <style>
+    body {
+      background-color: #121212;
+      color: #f9fafb;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    h2 {
+      font-weight: 700;
+      color: #facc15;
+    }
+
+    .card-dark {
+      background: #1e1e1e;
+      border: none;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      transition: transform 0.2s ease;
+    }
+
+    .card-dark:hover {
+      transform: translateY(-5px);
+    }
+
+    .chart-container {
+      height: 400px;
+    }
+
+    .highlight-box {
+      background: #0f172a;
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .highlight-box h5 {
+      color: #38bdf8;
+    }
+
+    .highlight-box p {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #f9fafb;
+    }
+  </style>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -14,14 +64,47 @@
   <%- include('../partials/navbar') %>
 
   <div class="container py-5">
-    <h2 class="text-warning mb-4">📊 Expense Analytics</h2>
+    <h2 class="mb-4"><i class="fa-solid fa-chart-pie"></i> Expense Analytics</h2>
 
-    <div class="row">
-      <div class="col-md-6 mb-4">
-        <canvas id="categoryChart"></canvas>
+    <!-- Highlights -->
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="highlight-box">
+          <h5>Total Spent</h5>
+          <p>₹ 21,100</p>
+        </div>
       </div>
-      <div class="col-md-6 mb-4">
-        <canvas id="monthlyChart"></canvas>
+      <div class="col-md-4">
+        <div class="highlight-box">
+          <h5>Top Category</h5>
+          <p>Food (38%)</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="highlight-box">
+          <h5>Highest Month</h5>
+          <p>April (₹12,000)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="card-dark">
+          <h5 class="mb-3"><i class="fa-solid fa-pizza-slice"></i> Category Wise</h5>
+          <div class="chart-container">
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card-dark">
+          <h5 class="mb-3"><i class="fa-solid fa-calendar"></i> Monthly Spending</h5>
+          <div class="chart-container">
+            <canvas id="monthlyChart"></canvas>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -29,29 +112,58 @@
   <%- include('../partials/footer') %>
 
   <script>
-    const categoryChart = new Chart(document.getElementById('categoryChart'), {
-      type: 'pie',
-      data: {
-        labels: ['Food', 'Bills', 'Travel', 'Shopping'],
-        datasets: [{
-          data: [4000, 2500, 1800, 2900],
-          backgroundColor: ['#fbbf24', '#38bdf8', '#a78bfa', '#ef4444']
-        }]
-      }
-    });
+  const categoryLabels = <%- JSON.stringify(categoryLabels) %>;
+  const categoryValues = <%- JSON.stringify(categoryValues) %>;
+  const monthlyLabels = <%- JSON.stringify(monthlyLabels) %>;
+  const monthlyValues = <%- JSON.stringify(monthlyValues) %>;
 
-    const monthlyChart = new Chart(document.getElementById('monthlyChart'), {
-      type: 'bar',
-      data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-        datasets: [{
-          label: 'Total Spent ₹',
-          data: [8200, 6500, 9000, 12000, 7400],
-          backgroundColor: '#f97316'
-        }]
+  // Category Chart
+  new Chart(document.getElementById('categoryChart'), {
+    type: 'pie',
+    data: {
+      labels: categoryLabels,
+      datasets: [{
+        data: categoryValues,
+        backgroundColor: ['#fbbf24', '#38bdf8', '#a78bfa', '#ef4444', '#34d399', '#f472b6']
+      }]
+    },
+    options: {
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              let total = context.dataset.data.reduce((a, b) => a + b, 0);
+              let value = context.raw;
+              let percentage = ((value / total) * 100).toFixed(1);
+              return `${context.label}: ₹${value} (${percentage}%)`;
+            }
+          }
+        }
       }
-    });
-  </script>
+    }
+  });
+
+  // Monthly Chart
+  new Chart(document.getElementById('monthlyChart'), {
+    type: 'bar',
+    data: {
+      labels: monthlyLabels,
+      datasets: [{
+        label: 'Total Spent ₹',
+        data: monthlyValues,
+        backgroundColor: '#f97316',
+        borderRadius: 6
+      }]
+    },
+    options: {
+      scales: {
+        x: { ticks: { color: '#f9fafb' } },
+        y: { ticks: { color: '#f9fafb' } }
+      }
+    }
+  });
+</script>
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
